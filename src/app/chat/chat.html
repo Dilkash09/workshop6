@@ -1,0 +1,46 @@
+<div class="content-area">
+  <div class="chat-header">
+    <div class="channel-info">
+      <i class="fas fa-hashtag"></i>
+      <span>{{ currentChannel?.name || 'Select a channel to start chatting' }}</span>
+    </div>
+    <div class="online-count">
+      <i class="fas fa-circle"></i>
+      <span>0 online</span>
+    </div>
+  </div>
+
+  <div class="chat-messages">
+    <div *ngIf="messages.length === 0" class="empty-state">
+      <i class="fas fa-comment-slash"></i>
+      <h3>No messages yet</h3>
+      <p>Start a conversation by sending a message</p>
+    </div>
+
+    <div 
+      *ngFor="let message of messages"
+      class="message"
+      [class.sent]="isCurrentUser(message)"
+      [class.received]="!isCurrentUser(message)">
+      <div class="message-sender">{{ message.username }}</div>
+      <div class="message-text">{{ message.text }}</div>
+      <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+    </div>
+  </div>
+
+  <div class="message-input">
+    <input 
+      type="text" 
+      [(ngModel)]="newMessage" 
+      placeholder="Type your message..." 
+      [disabled]="!currentChannel"
+      (keyup.enter)="onSendMessage()">
+    <button 
+      (click)="onSendMessage()" 
+      class="btn btn-primary" 
+      [disabled]="!currentChannel || !newMessage.trim()">
+      <i class="fas fa-paper-plane"></i>
+      <span>Send</span>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,340 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #2d3748;
+    line-height: 1.6;
+    overflow: hidden;
+}
+
+/* Header Styles */
+header {
+    background: linear-gradient(135deg, #2c3e50, #4a69bd);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    height: 60px;
+}
+
+.app-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.app-title i {
+    font-size: 1.5rem;
+    color: #4cd137;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.username {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6a89cc, #4a69bd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Main Content Layout */
+.main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-section {
+    padding: 0 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.sidebar-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+    color: #ecf0f1;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #34495e;
+}
+
+.sidebar-section h3 i {
+    font-size: 1.1rem;
+}
+
+/* List Styles */
+.groups-list,
+.channels-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.groups-list li,
+.channels-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.7rem 0.8rem;
+    margin-bottom: 0.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.groups-list li:hover,
+.channels-list li:hover {
+    background-color: #34495e;
+}
+
+.groups-list li.active,
+.channels-list li.active {
+    background: linear-gradient(135deg, #6a89cc, #4a69bd);
+    color: white;
+}
+
+.list-icon {
+    width: 20px;
+    text-align: center;
+}
+
+.list-icon i {
+    font-size: 0.9rem;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background-color: #34495e;
+    margin: 0.8rem 1rem;
+}
+
+/* Button in Sidebar */
+.sidebar-section .btn-outline {
+    background: transparent;
+    border: 1px solid #ecf0f1;
+    color: #ecf0f1;
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.sidebar-section .btn-outline:hover {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+}
+
+/* Chat Area */
+app-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Alert Styles */
+.alert {
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease;
+    max-width: 400px;
+}
+
+.alert-danger {
+    background-color: #ffe6e6;
+    border: 1px solid #ffcccc;
+    color: #d93030;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.alert button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Color Variables */
+:root {
+    --primary: #6e8efb;
+    --success: #4cd964;
+    --gray: #a0aec0;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #34495e;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #6a89cc;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #4a69bd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        padding: 0.7rem 1rem;
+    }
+    
+    .app-title span {
+        font-size: 1.1rem;
+    }
+    
+    .username {
+        display: none;
+    }
+    
+    .sidebar {
+        width: 220px;
+    }
+    
+    .sidebar-section {
+        padding: 0 0.8rem;
+    }
+    
+    .alert {
+        max-width: 90%;
+        left: 5%;
+        right: 5%;
+    }
+}
+
+/* Empty state styling */
+.groups-list li span[style*="color: var(--gray);"],
+.channels-list li span[style*="color: var(--gray);"] {
+    color: #95a5a6 !important;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Special list items */
+.groups-list li[style*="color: var(--primary);"],
+.channels-list li[style*="color: var(--success);"] {
+    margin-top: 0.5rem;
+    padding: 0.7rem 0.8rem;
+}
+
+.groups-list li[style*="color: var(--primary);"]:hover,
+.channels-list li[style*="color: var(--success);"]:hover {
+    opacity: 0.9;
+}

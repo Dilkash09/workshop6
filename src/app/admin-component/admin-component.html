@@ -1,0 +1,373 @@
+<header>
+  <div class="app-title">
+    <i class="fas fa-comments"></i>
+    <span>Chat Application - Admin Panel</span>
+  </div>
+  <div class="user-info">
+    <span class="username">{{ currentUser?.username }}</span>
+    <div class="user-avatar">{{ currentUser?.username?.charAt(0)?.toUpperCase() }}</div>
+    <button (click)="logout()" class="btn btn-danger">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </button>
+  </div>
+</header>
+
+<div class="admin-panel">
+  <h2>
+    <i class="fas fa-cog"></i>
+    Admin Panel
+  </h2>
+
+  <div class="tab-navigation">
+    <div 
+      class="tab" 
+      [class.active]="activeTab === 'users'" 
+      (click)="selectTab('users')">
+      <i class="fas fa-users"></i>
+      Users
+    </div>
+    <div 
+      class="tab" 
+      [class.active]="activeTab === 'groups'" 
+      (click)="selectTab('groups')">
+      <i class="fas fa-layer-group"></i>
+      Groups
+    </div>
+    <div 
+      class="tab" 
+      [class.active]="activeTab === 'channels'" 
+      (click)="selectTab('channels')">
+      <i class="fas fa-hashtag"></i>
+      Channels
+    </div>
+  </div>
+
+  <!-- Users Tab -->
+  <div id="users-tab" class="tab-content" [class.active]="activeTab === 'users'">
+    <h3><i class="fas fa-user-cog"></i> User Management</h3>
+    
+    <div *ngIf="!hasRole('super_admin')" class="alert alert-info">
+      <i class="fas fa-info-circle"></i> Only super admins can manage users
+    </div>
+
+    <div *ngIf="hasRole('super_admin')">
+      <!-- Search and Filter -->
+      <div class="admin-filters">
+        <input 
+          type="text" 
+          placeholder="Search users..." 
+          [(ngModel)]="userSearchTerm"
+          (input)="filterUsers()"
+          class="search-input">
+      </div>
+
+      <div class="user-stats">
+        <div class="stat-card">
+          <i class="fas fa-users"></i>
+          <span class="stat-number">{{ filteredUsers.length }}</span>
+          <span class="stat-label">Total Users</span>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-user-shield"></i>
+          <span class="stat-number">{{ getAdminCount() }}</span>
+          <span class="stat-label">Admins</span>
+        </div>
+      </div>
+
+      <ul class="user-list">
+        <li *ngFor="let user of filteredUsers" class="user-item">
+          <div class="user-info-container">
+            <div class="user-avatar-large">{{ user.username.charAt(0).toUpperCase() }}</div>
+            <div class="user-details">
+              <div class="user-name">{{ user.username }}</div>
+              <div class="user-email">{{ user.email }}</div>
+              <div class="user-roles">
+                <span class="role-badge" *ngFor="let role of user.roles">
+                  {{ role }}
+                </span>
+              </div>
+              <div class="user-groups" *ngIf="(userGroups[user.id]?.length ?? 0) > 0">
+                <i class="fas fa-layer-group"></i>
+                Groups: 
+                <span class="group-tag" *ngFor="let groupId of userGroups[user.id]">
+                  {{ getGroupName(groupId) }}
+                </span>
+              </div>
+              <div class="user-groups" *ngIf="!userGroups[user.id]?.length">
+                <i class="fas fa-layer-group"></i>
+                No groups assigned
+              </div>
+            </div>
+          </div>
+          
+          <div class="user-actions">
+            <!-- Promote/Demote Admin -->
+            <button 
+              *ngIf="!user.hasRole('super_admin')"
+              (click)="promoteUser(user)" 
+              class="btn btn-primary btn-sm action-btn"
+              [title]="user.hasRole('group_admin') ? 'Demote from Admin' : 'Promote to Admin'">
+              <i class="fas" [class.fa-user-shield]="!user.hasRole('group_admin')" [class.fa-user]="user.hasRole('group_admin')"></i>
+              {{ user.hasRole('group_admin') ? 'Demote' : 'Promote' }}
+            </button>
+            
+            <!-- Add to Group -->
+            <button 
+              (click)="openAddToGroupModal(user)" 
+              class="btn btn-success btn-sm action-btn"
+              title="Add to Group">
+              <i class="fas fa-user-plus"></i>
+              Add to Group
+            </button>
+            
+            <!-- Remove from Group -->
+            <button 
+             *ngIf="(userGroups[user.id]?.length ?? 0) > 0"
+              
+              (click)="openRemoveFromGroupModal(user)" 
+              class="btn btn-warning btn-sm action-btn"
+              title="Remove from Group">
+              <i class="fas fa-user-minus"></i>
+              Remove from Group
+            </button>
+            
+            <!-- View Group Memberships -->
+            <button 
+              (click)="viewUserGroups(user)" 
+              class="btn btn-info btn-sm action-btn"
+              title="View Group Details">
+              <i class="fas fa-eye"></i>
+              View Groups
+            </button>
+            
+            <!-- Delete User -->
+            <button 
+              (click)="deleteUser(user)" 
+              class="btn btn-danger btn-sm action-btn"
+              title="Delete User">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </div>
+        </li>
+        
+        <li *ngIf="filteredUsers.length === 0" class="no-items">
+          <i class="fas fa-users-slash"></i>
+          No users found
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Groups Tab -->
+  <div id="groups-tab" class="tab-content" [class.active]="activeTab === 'groups'">
+    <h3><i class="fas fa-layer-group"></i> Group Management</h3>
+    
+    <div class="admin-actions">
+      <button (click)="createNewGroup()" class="btn btn-success">
+        <i class="fas fa-plus"></i>
+        <span>Create New Group</span>
+      </button>
+      
+      <button (click)="loadGroups()" class="btn btn-secondary">
+        <i class="fas fa-sync-alt"></i>
+        <span>Refresh</span>
+      </button>
+    </div>
+
+    <div class="group-stats">
+      <div class="stat-card">
+        <i class="fas fa-layer-group"></i>
+        <span class="stat-number">{{ groups.length }}</span>
+        <span class="stat-label">Total Groups</span>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <span class="stat-number">{{ getTotalMembers() }}</span>
+        <span class="stat-label">Total Members</span>
+      </div>
+    </div>
+
+    <div class="group-grid">
+      <div *ngFor="let group of groups" class="group-card">
+        <div class="group-header">
+          <h4>{{ group.name }}</h4>
+          <span class="group-members">{{ group.members.length }} members</span>
+        </div>
+        
+        <div class="group-description">
+          {{ group.description || 'No description' }}
+        </div>
+        
+        <div class="group-created">
+          Created by: {{ getUsername(group.createdBy) }}
+        </div>
+        
+        <div class="group-actions">
+          <button 
+            (click)="viewGroupMembers(group)" 
+            class="btn btn-info btn-sm"
+            title="View Members">
+            <i class="fas fa-users"></i>
+            Members
+          </button>
+          
+          <button 
+            (click)="editGroup(group)" 
+            class="btn btn-primary btn-sm"
+            title="Edit Group">
+            <i class="fas fa-edit"></i>
+            Edit
+          </button>
+          
+          <button 
+            (click)="deleteGroup(group)" 
+            class="btn btn-danger btn-sm"
+            title="Delete Group">
+            <i class="fas fa-trash"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="groups.length === 0" class="no-items">
+        <i class="fas fa-layer-group"></i>
+        No groups found
+      </div>
+    </div>
+  </div>
+
+  <!-- Channels Tab -->
+  <div id="channels-tab" class="tab-content" [class.active]="activeTab === 'channels'">
+    <h3><i class="fas fa-hashtag"></i> Channel Management</h3>
+    
+    <div class="admin-actions">
+      <button (click)="createNewChannel()" class="btn btn-success">
+        <i class="fas fa-plus"></i>
+        <span>Create New Channel</span>
+      </button>
+    </div>
+
+    <div class="channel-stats">
+      <div class="stat-card">
+        <i class="fas fa-hashtag"></i>
+        <span class="stat-number">{{ channels.length }}</span>
+        <span class="stat-label">Total Channels</span>
+      </div>
+    </div>
+
+    <div class="channel-list">
+      <div *ngFor="let channel of channels" class="channel-item">
+        <div class="channel-info">
+          <div class="channel-name">#{{ channel.name }}</div>
+          <div class="channel-group">Group: {{ channel.groupName }}</div>
+          <div class="channel-created">
+            Created: {{ channel.createdAt | date:'medium' }}
+          </div>
+        </div>
+        
+        <div class="channel-actions">
+          <button 
+            (click)="editChannel(channel)" 
+            class="btn btn-primary btn-sm"
+            title="Edit Channel">
+            <i class="fas fa-edit"></i>
+            Edit
+          </button>
+          
+          <button 
+            (click)="deleteChannel(channel)" 
+            class="btn btn-danger btn-sm"
+            title="Delete Channel">
+            <i class="fas fa-trash"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="channels.length === 0" class="no-items">
+        <i class="fas fa-hashtag"></i>
+        No channels found
+      </div>
+    </div>
+  </div>
+
+  <!-- Group Management Modal -->
+  <div *ngIf="showGroupModal" class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modalTitle }}</h3>
+        <button (click)="closeModal()" class="btn-close">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div *ngIf="modalAction === 'add'">
+          <p>Add <strong>{{ selectedUser?.username }}</strong> to a group:</p>
+          <select [(ngModel)]="selectedGroupId" class="form-select">
+            <option value="">Select a group</option>
+            <option *ngFor="let group of availableGroups" [value]="group.id">
+              {{ group.name }} ({{ group.members.length }} members)
+            </option>
+          </select>
+        </div>
+        
+        <div *ngIf="modalAction === 'remove'">
+          <p>Remove <strong>{{ selectedUser?.username }}</strong> from a group:</p>
+          <select [(ngModel)]="selectedGroupId" class="form-select">
+            <option value="">Select a group</option>
+            <option *ngFor="let groupId of userGroups[selectedUser?.id!] || []" [value]="groupId">
+              {{ getGroupName(groupId) }}
+            </option>
+          </select>
+        </div>
+        
+        <div *ngIf="modalAction === 'view' && selectedUser">
+          <h4>{{ selectedUser.username }}'s Groups</h4>
+          <div class="user-groups-list">
+            <div *ngFor="let groupId of userGroups[selectedUser.id] || []" class="group-item">
+              <i class="fas fa-layer-group"></i>
+              {{ getGroupName(groupId) }}
+              <button 
+                (click)="removeUserFromGroupDirect(groupId, selectedUser!)" 
+                class="btn btn-sm btn-outline-danger">
+                Remove
+              </button>
+            </div>
+            <div *ngIf="!userGroups[selectedUser.id]?.length" class="no-groups">
+              User is not a member of any groups
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer" *ngIf="modalAction !== 'view'">
+        <button (click)="closeModal()" class="btn btn-secondary">Cancel</button>
+        <button (click)="confirmGroupAction()" class="btn btn-primary" [disabled]="!selectedGroupId">
+          {{ modalAction === 'add' ? 'Add to Group' : 'Remove from Group' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="admin-navigation">
+    <button (click)="navigateToDashboard()" class="btn btn-primary">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back to Chat</span>
+    </button>
+    
+    <button (click)="loadData()" class="btn btn-outline-secondary">
+      <i class="fas fa-sync-alt"></i>
+      <span>Refresh Data</span>
+    </button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Loading...</span>
+    </div>
+  </div>
+</div>
